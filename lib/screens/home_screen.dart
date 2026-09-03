@@ -43,6 +43,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  int get _difficultyMultiplier {
+    switch (_currentDifficulty) {
+      case '초급':
+        return 1;
+      case '중급':
+        return 2;
+      case '고급':
+        return 3;
+      default:
+        return 1;
+    }
+  }
+
   Set<int> get _completedNumbers {
     Map<int, int> counts = {};
     for (var row in _grid.cells) {
@@ -237,37 +250,153 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  int _calculateScore(int totalSeconds) {
+  int _calculateBaseScore(int totalSeconds) {
     if (totalSeconds <= 300) return 10; // 5분 이내 10점
-    if (totalSeconds > 1500) return 0;  // 25분 초과 0점
+    if (totalSeconds > 1380) return 1;  // 23분 초과 시 최소 1점 유지
 
     int extraSeconds = totalSeconds - 300;
     int penalty = (extraSeconds + 119) ~/ 120;
     int score = 10 - penalty;
-    return score < 0 ? 0 : score;
+    return score < 1 ? 1 : score;
   }
+
+  int get _finalScore => _calculateBaseScore(_elapsedSeconds) * _difficultyMultiplier;
 
   void _checkCompletion() {
     if (_engine.isGridComplete(_grid.toIntGrid())) {
       _timer?.cancel();
-      int finalScore = _calculateScore(_elapsedSeconds);
+      int baseScore = _calculateBaseScore(_elapsedSeconds);
+      int multiplier = _difficultyMultiplier;
+      int finalScore = baseScore * multiplier;
+
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('축하합니다!'),
-          content: Text('스도쿠를 모두 풀었습니다!\n\n최종 점수: ${finalScore}점\n경과 시간: ${_formatDuration(_elapsedSeconds)}'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _startNewGame();
-              },
-              child: const Text('새 게임'),
+        barrierDismissible: false,
+        builder: (_) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          elevation: 10,
+          backgroundColor: Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.blue.shade200, width: 2),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 축하 헤더 아이콘
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.emoji_events_rounded,
+                    size: 48,
+                    color: Colors.amber.shade700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '축하합니다!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.blue.shade900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '스도쿠를 성공적으로 완성하셨습니다 🎉',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // 결과 카드 (파란색 테마)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildResultRow('난이도', '$_currentDifficulty (×$multiplier 배율)', Colors.blue.shade900),
+                      const Divider(height: 16, thickness: 1),
+                      _buildResultRow('경과 시간', _formatDuration(_elapsedSeconds), Colors.black87),
+                      const Divider(height: 16, thickness: 1),
+                      _buildResultRow('기본 점수', '$baseScore점', Colors.black87),
+                      const Divider(height: 16, thickness: 1),
+                      _buildResultRow('최종 점수', '$finalScore점 ⭐', Colors.indigo.shade900, isBold: true),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // 새 게임 버튼
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _startNewGame();
+                    },
+                    icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
+                    label: const Text(
+                      '새 게임 시작하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade700,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
+  }
+
+  Widget _buildResultRow(String label, String value, Color valueColor, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.blue.shade900,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isBold ? 16 : 14,
+            fontWeight: isBold ? FontWeight.w900 : FontWeight.bold,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
   }
 
   PopupMenuItem<String> _buildMenuItem(String level, IconData icon, Color iconColor) {
@@ -455,8 +584,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         '• 4점: 17분 이내\n'
                         '• 3점: 19분 이내\n'
                         '• 2점: 21분 이내\n'
-                        '• 1점: 23분 이내\n'
-                        '• 0점: 25분 초과',
+                        '• 1점: 23분 초과\n\n'
+                        '⭐ 난이도별 가중치 배율\n'
+                        '• 초급: 기본점수 × 1\n'
+                        '• 중급: 기본점수 × 2\n'
+                        '• 고급: 기본점수 × 3',
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
@@ -491,7 +623,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
                             const SizedBox(width: 4),
                             Text(
-                              '점수: ${_calculateScore(_elapsedSeconds)}점',
+                              '점수: ${_finalScore}점',
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
                             const SizedBox(width: 2),
@@ -616,7 +748,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onClear: _onClear,
             completedNumbers: _completedNumbers,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 10),
         ],
       ),
     );
