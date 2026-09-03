@@ -67,8 +67,127 @@ class SudokuCellWidget extends StatelessWidget {
     Color backgroundColor = Colors.white;
     if (isSelected) {
       backgroundColor = Colors.blue[200]!;
+    } else if (cell.isMemoMode) {
+      backgroundColor = const Color(0xFFFFEFF2); // 옅은 파스텔 핑크색 (Light Pink)
     } else if (isRelated) {
-      backgroundColor = Colors.blue[50]!;
+      backgroundColor = Colors.grey[200]!;
+    }
+
+    Widget content;
+    if (cell.value != 0) {
+      content = Center(
+        child: Text(
+          '${cell.value}',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: cell.isFixed ? FontWeight.bold : FontWeight.normal,
+            color: textColor,
+          ),
+        ),
+      );
+    } else if (cell.memos.isNotEmpty) {
+      content = Stack(
+        children: [
+          // 1번째: 좌측 상단 (Top-Left)
+          if (cell.memos.isNotEmpty)
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 3.0, top: 1.0),
+                child: Text(
+                  '${cell.memos[0]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 2번째: 우측 상단 (Top-Right)
+          if (cell.memos.length > 1)
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 3.0, top: 1.0),
+                child: Text(
+                  '${cell.memos[1]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 3번째: 좌측 하단 (Bottom-Left)
+          if (cell.memos.length > 2)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 3.0, bottom: 1.0),
+                child: Text(
+                  '${cell.memos[2]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 4번째: 우측 하단 (Bottom-Right)
+          if (cell.memos.length > 3)
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 3.0, bottom: 1.0),
+                child: Text(
+                  '${cell.memos[3]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 5번째: 중간 왼쪽 (Center-Left)
+          if (cell.memos.length > 4)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 3.0),
+                child: Text(
+                  '${cell.memos[4]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 6번째: 중간 오른쪽 (Center-Right)
+          if (cell.memos.length > 5)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 3.0),
+                child: Text(
+                  '${cell.memos[5]}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    } else {
+      content = const SizedBox.shrink();
     }
 
     return GestureDetector(
@@ -83,16 +202,7 @@ class SudokuCellWidget extends StatelessWidget {
             bottom: _getBottomBorder(),
           ),
         ),
-        child: Center(
-          child: Text(
-            cell.value == 0 ? '' : '${cell.value}',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: cell.isFixed ? FontWeight.bold : FontWeight.normal,
-              color: textColor,
-            ),
-          ),
-        ),
+        child: content,
       ),
     );
   }

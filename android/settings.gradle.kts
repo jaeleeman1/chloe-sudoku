@@ -1,4 +1,20 @@
 pluginManagement {
+    try {
+        val processEnvClass = Class.forName("java.lang.ProcessEnvironment")
+        val theEnvField = processEnvClass.getDeclaredField("theEnvironment")
+        theEnvField.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        val env = theEnvField.get(null) as MutableMap<String, String>
+        env.remove("ANDROID_PREFS_ROOT")
+
+        val theCaseInsensitiveEnvField = processEnvClass.getDeclaredField("theCaseInsensitiveEnvironment")
+        theCaseInsensitiveEnvField.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        val ciEnv = theCaseInsensitiveEnvField.get(null) as MutableMap<String, String>
+        ciEnv.remove("ANDROID_PREFS_ROOT")
+    } catch (_: Throwable) {
+    }
+
     val flutterSdkPath =
         run {
             val properties = java.util.Properties()
@@ -19,8 +35,8 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.7.3" apply false
-    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    id("com.android.application") version "9.0.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
 include(":app")

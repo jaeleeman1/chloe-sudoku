@@ -24,6 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
   int _elapsedSeconds = 0;
   Timer? _timer;
 
+  // 메모 모드 글로벌 상태
+  bool _isGlobalMemoMode = false;
+
+  // Undo (되돌리기) 히스토리 스택
+  final List<SudokuGrid> _undoHistory = [];
+
   int get _difficultyRemovedCount {
     switch (_currentDifficulty) {
       case '초급':
@@ -35,6 +41,24 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return 30;
     }
+  }
+
+  Set<int> get _completedNumbers {
+    Map<int, int> counts = {};
+    for (var row in _grid.cells) {
+      for (var cell in row) {
+        if (cell.value != 0 && !cell.isInvalid) {
+          counts[cell.value] = (counts[cell.value] ?? 0) + 1;
+        }
+      }
+    }
+    Set<int> completed = {};
+    counts.forEach((num, count) {
+      if (count >= 9) {
+        completed.add(num);
+      }
+    });
+    return completed;
   }
 
   @override
@@ -49,10 +73,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _saveHistory() {
+    _undoHistory.add(_grid.copy());
+    if (_undoHistory.length > 50) {
+      _undoHistory.removeAt(0);
+    }
+  }
+
   void _startNewGame() {
     _timer?.cancel();
     _startTime = DateTime.now();
     _elapsedSeconds = 0;
+    _undoHistory.clear();
+    _isGlobalMemoMode = false;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _elapsedSeconds++;
@@ -66,14 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedRow = null;
       _selectedCol = null;
     });
-  }
-
-  String _formatTime(DateTime? dt) {
-    if (dt == null) return '--:--:--';
-    final hour = dt.hour.toString().padLeft(2, '0');
-    final minute = dt.minute.toString().padLeft(2, '0');
-    final second = dt.second.toString().padLeft(2, '0');
-    return '$hour:$minute:$second';
   }
 
   String _formatDuration(int totalSeconds) {
@@ -91,23 +116,104 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedRow = row;
       _selectedCol = col;
+
+      if (_isGlobalMemoMode && _selectedRow != null && _selectedCol != null) {
+        SudokuCell cell = _grid.cells[_selectedRow!][_selectedCol!];
+        if (!cell.isFixed && cell.value == 0) {
+          cell.isMemoMode = true;
+        }
+      }
     });
+  }
+
+  void _autoRemoveMemoNumbers(int r, int c, int number) {
+    for (int row = 0; row < 9; row++) {
+      for (int col = 0; col < 9; col++) {
+        if (row == r && col == c) continue;
+
+        bool isSameRow = (row == r);
+        bool isSameCol = (col == c);
+        bool isSameBox = (row ~/ 3 == r ~/ 3) && (col ~/ 3 == c ~/ 3);
+
+        if (isSameRow || isSameCol || isSameBox) {
+          SudokuCell targetCell = _grid.cells[row][col];
+          if (targetCell.memos.contains(number)) {
+            targetCell.memos.remove(number);
+            if (targetCell.memos.isEmpty) {
+              targetCell.isMemoMode = false;
+            }
+          }
+        }
+      }
+    }
   }
 
   void _onNumberSelected(int number) {
     if (_selectedRow != null && _selectedCol != null) {
+      SudokuCell targetCell = _grid.cells[_selectedRow!][_selectedCol!];
+      if (targetCell.isFixed) return;
+
+      _saveHistory();
+
       setState(() {
-        _grid.set(_selectedRow!, _selectedCol!, number);
-        _validateGrid();
-        _checkCompletion();
+        if (_isGlobalMemoMode) {
+          // 메모 모드가 활성화되어 있을 때 -> 후보 메모 숫자 입력
+          targetCell.isMemoMode = true;
+          if (targetCell.memos.contains(number)) {
+            targetCell.memos.remove(number);
+            if (targetCell.memos.isEmpty) {
+              targetCell.isMemoMode = false;
+            }
+          } else if (targetCell.memos.length < 6) {
+            targetCell.memos.add(number);
+          }
+        } else {
+          // 메모 버튼을 한번 더 눌러 일반 모드로 전환된 상태 -> 일반 표준 숫자 입력
+          // 기존에 메모나 핑크색이 있었다면 모두 사라지고 일반 숫자가 입력됨!
+          _grid.set(_selectedRow!, _selectedCol!, number);
+          _autoRemoveMemoNumbers(_selectedRow!, _selectedCol!, number);
+          _validateGrid();
+          _checkCompletion();
+        }
       });
     }
   }
 
+  void _onToggleMemoMode() {
+    setState(() {
+      _isGlobalMemoMode = !_isGlobalMemoMode;
+      if (_selectedRow != null && _selectedCol != null) {
+        SudokuCell targetCell = _grid.cells[_selectedRow!][_selectedCol!];
+        if (!targetCell.isFixed && targetCell.value == 0) {
+          if (_isGlobalMemoMode) {
+            targetCell.isMemoMode = true;
+          } else if (targetCell.memos.isEmpty) {
+            targetCell.isMemoMode = false;
+          }
+        }
+      }
+    });
+  }
+
   void _onClear() {
     if (_selectedRow != null && _selectedCol != null) {
+      SudokuCell targetCell = _grid.cells[_selectedRow!][_selectedCol!];
+      if (!targetCell.isFixed) {
+        _saveHistory();
+        setState(() {
+          _grid.set(_selectedRow!, _selectedCol!, 0);
+          targetCell.isMemoMode = false;
+          targetCell.memos.clear();
+          _validateGrid();
+        });
+      }
+    }
+  }
+
+  void _onUndo() {
+    if (_undoHistory.isNotEmpty) {
       setState(() {
-        _grid.set(_selectedRow!, _selectedCol!, 0);
+        _grid = _undoHistory.removeLast();
         _validateGrid();
       });
     }
@@ -131,14 +237,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  int _calculateScore(int totalSeconds) {
+    if (totalSeconds <= 300) return 10; // 5분 이내 10점
+    if (totalSeconds > 1500) return 0;  // 25분 초과 0점
+
+    int extraSeconds = totalSeconds - 300;
+    int penalty = (extraSeconds + 119) ~/ 120;
+    int score = 10 - penalty;
+    return score < 0 ? 0 : score;
+  }
+
   void _checkCompletion() {
     if (_engine.isGridComplete(_grid.toIntGrid())) {
       _timer?.cancel();
+      int finalScore = _calculateScore(_elapsedSeconds);
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('축하합니다!'),
-          content: Text('스도쿠를 모두 풀었습니다!\n경과 시간: ${_formatDuration(_elapsedSeconds)}'),
+          content: Text('스도쿠를 모두 풀었습니다!\n\n최종 점수: ${finalScore}점\n경과 시간: ${_formatDuration(_elapsedSeconds)}'),
           actions: [
             TextButton(
               onPressed: () {
@@ -153,14 +270,48 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  PopupMenuItem<String> _buildMenuItem(String level, IconData icon, Color iconColor) {
+    bool isSelected = _currentDifficulty == level;
+    return PopupMenuItem<String>(
+      value: level,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade100 : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? Colors.blue.shade900 : iconColor,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                level,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue.shade900 : Colors.blue.shade800,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check, size: 16, color: Colors.blue.shade800),
+          ],
+        ),
+      ),
+    );
+  }
+
   bool _isRelated(int r, int c) {
     if (_selectedRow == null || _selectedCol == null) return false;
     if (r == _selectedRow && c == _selectedCol) return false;
 
-    // 좌우 (같은 행) 및 위아래 (같은 열)
     if (r == _selectedRow || c == _selectedCol) return true;
 
-    // 선택한 셀에 입력된 숫자가 있을 경우, 같은 숫자를 가진 다른 셀 강조
     int selectedVal = _grid.get(_selectedRow!, _selectedCol!);
     if (selectedVal != 0 && _grid.get(r, c) == selectedVal) return true;
 
@@ -171,7 +322,43 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chloe Sudoku'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.grid_3x3_rounded,
+                color: Colors.blue.shade900,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 8),
+            ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                colors: [
+                  Colors.blue.shade900,
+                  Colors.indigo.shade700,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(bounds),
+              child: const Text(
+                'Chloe Sudoku',
+                style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
@@ -213,44 +400,106 @@ class _HomeScreenState extends State<HomeScreen> {
                         });
                       }
                     },
+                    color: Colors.blue.shade50,
+                    elevation: 6,
+                    shadowColor: Colors.blue.shade200.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: Colors.blue.shade200, width: 1.0),
+                    ),
                     itemBuilder: (context) => [
-                      const PopupMenuItem(value: '초급', child: Text('초급')),
-                      const PopupMenuItem(value: '중급', child: Text('중급')),
-                      const PopupMenuItem(value: '고급', child: Text('고급')),
+                      _buildMenuItem('초급', Icons.sentiment_satisfied_alt, Colors.blue.shade600),
+                      _buildMenuItem('중급', Icons.sentiment_neutral, Colors.indigo.shade600),
+                      _buildMenuItem('고급', Icons.local_fire_department, Colors.deepPurple.shade600),
                     ],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade300),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.blue.shade300, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.shade100,
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _currentDifficulty,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              color: Colors.blue.shade800,
                             ),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: Colors.blue, size: 18),
+                          const SizedBox(width: 2),
+                          Icon(Icons.arrow_drop_down, color: Colors.blue.shade800, size: 20),
                         ],
                       ),
                     ),
                   ),
-                  // 시작 시간
-                  Row(
-                    children: [
-                      const Icon(Icons.play_circle_outline, size: 16, color: Colors.blue),
-                      const SizedBox(width: 4),
-                      Text(
-                        '시작: ${_formatTime(_startTime)}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+                  // 점수 (스코어) & 툴팁/팝업
+                  Tooltip(
+                    message: '🏆 점수 산출 규칙\n'
+                        '• 10점: 5분 이내\n'
+                        '• 9점: 7분 이내\n'
+                        '• 8점: 9분 이내\n'
+                        '• 7점: 11분 이내\n'
+                        '• 6점: 13분 이내\n'
+                        '• 5점: 15분 이내\n'
+                        '• 4점: 17분 이내\n'
+                        '• 3점: 19분 이내\n'
+                        '• 2점: 21분 이내\n'
+                        '• 1점: 23분 이내\n'
+                        '• 0점: 25분 초과',
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade900.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                      height: 1.5,
+                    ),
+                    preferBelow: false,
+                    triggerMode: TooltipTriggerMode.tap,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.amber.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              '점수: ${_calculateScore(_elapsedSeconds)}점',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+                            ),
+                            const SizedBox(width: 2),
+                            Icon(Icons.info_outline, size: 14, color: Colors.amber.shade900),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                   // 경과 시간
                   Row(
@@ -299,11 +548,75 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const Spacer(),
+          // 메모 & 되돌리기 버튼 (숫자 패드 바로 위)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _onToggleMemoMode,
+                    icon: Icon(
+                      Icons.edit_note,
+                      color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade700,
+                    ),
+                    label: Text(
+                      '메모',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade800,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: _isGlobalMemoMode ? const Color(0xFFFFEFF2) : Colors.white,
+                      side: BorderSide(
+                        color: _isGlobalMemoMode ? Colors.pink.shade300 : Colors.blue.shade300,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _undoHistory.isNotEmpty ? _onUndo : null,
+                    icon: Icon(
+                      Icons.undo_rounded,
+                      color: _undoHistory.isNotEmpty ? Colors.blue.shade700 : Colors.grey,
+                    ),
+                    label: Text(
+                      '되돌리기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _undoHistory.isNotEmpty ? Colors.blue.shade800 : Colors.grey,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(
+                        color: _undoHistory.isNotEmpty ? Colors.blue.shade300 : Colors.grey.shade300,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           NumberPad(
             onNumberSelected: _onNumberSelected,
             onClear: _onClear,
+            completedNumbers: _completedNumbers,
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
         ],
       ),
     );

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class NumberPad extends StatelessWidget {
   final Function(int) onNumberSelected;
   final VoidCallback onClear;
+  final Set<int> completedNumbers;
 
   const NumberPad({
     super.key,
     required this.onNumberSelected,
     required this.onClear,
+    this.completedNumbers = const {},
   });
 
   @override
@@ -31,13 +33,30 @@ class NumberPad extends StatelessWidget {
   }
 
   Widget _buildNumberButton(int number) {
+    bool isCompleted = completedNumbers.contains(number);
+
     return ElevatedButton(
       onPressed: () => onNumberSelected(number),
       style: ElevatedButton.styleFrom(
+        backgroundColor: isCompleted ? Colors.amber.shade300 : Colors.blue.shade50,
+        foregroundColor: isCompleted ? Colors.brown.shade900 : Colors.blue.shade900,
         minimumSize: const Size(50, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: isCompleted ? 4 : 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: isCompleted ? Colors.amber.shade600 : Colors.blue.shade200,
+            width: isCompleted ? 1.8 : 1.0,
+          ),
+        ),
       ),
-      child: Text('$number', style: const TextStyle(fontSize: 20)),
+      child: Text(
+        '$number',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
     );
   }
 
@@ -47,7 +66,7 @@ class NumberPad extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.orange[100],
         minimumSize: const Size(50, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: const Icon(Icons.backspace_outlined, color: Colors.orange),
     );

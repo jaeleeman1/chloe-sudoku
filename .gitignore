@@ -12,6 +12,10 @@
 .swiftpm/
 migrate_working_dir/
 
+# Local SDK properties
+local.properties
+**/local.properties
+
 # IntelliJ related
 *.iml
 *.ipr
