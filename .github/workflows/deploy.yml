@@ -42,7 +42,7 @@ jobs:
         key: ${{ secrets.N100_SSH_KEY }}
         port: ${{ secrets.N100_PORT }}
         source: "build/web/*"
-        target: "/home/felix530/sudoku-web"
+        target: "/home/felix530/project/sudoku-web"
         strip_prefix: "build/web"
 
     # 6. N100 미니 PC의 Docker 컨테이너 재시작
