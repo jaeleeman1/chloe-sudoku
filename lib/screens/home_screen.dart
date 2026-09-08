@@ -523,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: OutlinedButton.icon(
               onPressed: _startNewGame,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('New Game'),
+              label: const Text('새 게임'),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
