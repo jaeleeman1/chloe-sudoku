@@ -25,7 +25,7 @@ jobs:
       run: |
         scp -r build/web/* felix530@192.168.35.137:/home/felix530/project/sudoku-web/
 
-    # 4. N100 미니 PC의 Docker 컨테이너 재시작
+    # 4. N100 미니 PC의 Docker 컨테이너 재시작 함
     - name: Restart N100 Docker Container
       run: |
         ssh felix530@192.168.35.137 "docker restart chloe-sudoku"
