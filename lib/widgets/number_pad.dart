@@ -14,61 +14,100 @@ class NumberPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(5, (index) => _buildNumberButton(index + 1)),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ...List.generate(4, (index) => _buildNumberButton(index + 6)),
-            _buildClearButton(),
-          ],
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: List.generate(
+              5,
+              (index) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: _buildNumberButton(context, index + 1),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              ...List.generate(
+                4,
+                (index) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: _buildNumberButton(context, index + 6),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: _buildClearButton(context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildNumberButton(int number) {
+  Widget _buildNumberButton(BuildContext context, int number) {
     bool isCompleted = completedNumbers.contains(number);
 
-    return ElevatedButton(
-      onPressed: () => onNumberSelected(number),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isCompleted ? Colors.amber.shade300 : Colors.blue.shade50,
-        foregroundColor: isCompleted ? Colors.brown.shade900 : Colors.blue.shade900,
-        minimumSize: const Size(50, 50),
-        elevation: isCompleted ? 4 : 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
-            color: isCompleted ? Colors.amber.shade600 : Colors.blue.shade200,
-            width: isCompleted ? 1.8 : 1.0,
+    return AspectRatio(
+      aspectRatio: 1.25,
+      child: ElevatedButton(
+        onPressed: () => onNumberSelected(number),
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          backgroundColor: isCompleted ? Colors.amber.shade300 : Colors.blue.shade50,
+          foregroundColor: isCompleted ? Colors.brown.shade900 : Colors.blue.shade900,
+          elevation: isCompleted ? 2 : 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: isCompleted ? Colors.amber.shade600 : Colors.blue.shade200,
+              width: isCompleted ? 1.5 : 1.0,
+            ),
+          ),
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '$number',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
       ),
-      child: Text(
-        '$number',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
     );
   }
 
-  Widget _buildClearButton() {
-    return ElevatedButton(
-      onPressed: onClear,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange[100],
-        minimumSize: const Size(50, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  Widget _buildClearButton(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1.25,
+      child: ElevatedButton(
+        onPressed: onClear,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          backgroundColor: Colors.orange[100],
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: Colors.orange.shade300, width: 1.0),
+          ),
+        ),
+        child: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Icon(Icons.backspace_outlined, color: Colors.orange, size: 18),
+        ),
       ),
-      child: const Icon(Icons.backspace_outlined, color: Colors.orange),
     );
   }
 }

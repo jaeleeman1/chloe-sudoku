@@ -67,8 +67,6 @@ class SudokuCellWidget extends StatelessWidget {
     Color backgroundColor = Colors.white;
     if (isSelected) {
       backgroundColor = Colors.blue[200]!;
-    } else if (cell.isMemoMode) {
-      backgroundColor = const Color(0xFFFFEFF2); // 옅은 파스텔 핑크색 (Light Pink)
     } else if (isRelated) {
       backgroundColor = Colors.grey[200]!;
     }
@@ -88,14 +86,14 @@ class SudokuCellWidget extends StatelessWidget {
     } else if (cell.memos.isNotEmpty) {
       content = Stack(
         children: [
-          // 1번째: 좌측 상단 (Top-Left)
-          if (cell.memos.isNotEmpty)
+          // 1번: 좌측 상단 (Top-Left)
+          if (cell.memos.contains(1))
             Align(
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 3.0, top: 1.0),
                 child: Text(
-                  '${cell.memos[0]}',
+                  '1',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -104,14 +102,30 @@ class SudokuCellWidget extends StatelessWidget {
                 ),
               ),
             ),
-          // 2번째: 우측 상단 (Top-Right)
-          if (cell.memos.length > 1)
+          // 2번: 상단 가운데 (Top-Center)
+          if (cell.memos.contains(2))
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 1.0),
+                child: Text(
+                  '2',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 3번: 우측 상단 (Top-Right)
+          if (cell.memos.contains(3))
             Align(
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: 3.0, top: 1.0),
                 child: Text(
-                  '${cell.memos[1]}',
+                  '3',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -120,46 +134,14 @@ class SudokuCellWidget extends StatelessWidget {
                 ),
               ),
             ),
-          // 3번째: 좌측 하단 (Bottom-Left)
-          if (cell.memos.length > 2)
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 3.0, bottom: 1.0),
-                child: Text(
-                  '${cell.memos[2]}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
-                  ),
-                ),
-              ),
-            ),
-          // 4번째: 우측 하단 (Bottom-Right)
-          if (cell.memos.length > 3)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 3.0, bottom: 1.0),
-                child: Text(
-                  '${cell.memos[3]}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
-                  ),
-                ),
-              ),
-            ),
-          // 5번째: 중간 왼쪽 (Center-Left)
-          if (cell.memos.length > 4)
+          // 4번: 중간 왼쪽 (Center-Left)
+          if (cell.memos.contains(4))
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 3.0),
                 child: Text(
-                  '${cell.memos[4]}',
+                  '4',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -168,14 +150,75 @@ class SudokuCellWidget extends StatelessWidget {
                 ),
               ),
             ),
-          // 6번째: 중간 오른쪽 (Center-Right)
-          if (cell.memos.length > 5)
+          // 5번: 중간 가운데 (Center-Center)
+          if (cell.memos.contains(5))
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                '5',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pink.shade800,
+                ),
+              ),
+            ),
+          // 6번: 중간 오른쪽 (Center-Right)
+          if (cell.memos.contains(6))
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: 3.0),
                 child: Text(
-                  '${cell.memos[5]}',
+                  '6',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 7번: 좌측 하단 (Bottom-Left)
+          if (cell.memos.contains(7))
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 3.0, bottom: 1.0),
+                child: Text(
+                  '7',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 8번: 하단 가운데 (Bottom-Center)
+          if (cell.memos.contains(8))
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 1.0),
+                child: Text(
+                  '8',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade800,
+                  ),
+                ),
+              ),
+            ),
+          // 9번: 우측 하단 (Bottom-Right)
+          if (cell.memos.contains(9))
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 3.0, bottom: 1.0),
+                child: Text(
+                  '9',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
