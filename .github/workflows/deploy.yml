@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # GitHub 클라우드 무상 서버 자동 가동!
+    runs-on: self-hosted # GitHub 클라우드 무상 서버 자동 가동!
 
     steps:
     # 1. 소스 코드 가져오기
