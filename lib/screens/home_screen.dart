@@ -275,7 +275,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  int _calculateLiveScore(int totalSeconds) {
+  int _getCurrentGameScore() {
+    int score = _getBaseScore(_currentDifficulty) - _mistakeCount;
+    return score < 0 ? 0 : score;
+  }
+
+  int _calculateFinalScore(int totalSeconds) {
     int baseScore = _getBaseScore(_currentDifficulty);
     int targetSeconds;
 
@@ -308,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _checkCompletion() {
     if (_engine.isGridComplete(_grid.toIntGrid())) {
       _timer?.cancel();
-      int finalScore = _calculateLiveScore(_elapsedSeconds);
+      int finalScore = _calculateFinalScore(_elapsedSeconds);
 
       showDialog(
         context: context,
@@ -643,7 +648,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '점수: ${_calculateLiveScore(_elapsedSeconds)}점',
+                                    '점수: ${_getCurrentGameScore()}점',
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
                                   ),
                                   const SizedBox(width: 2),
