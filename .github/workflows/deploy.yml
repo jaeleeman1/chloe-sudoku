@@ -6,26 +6,52 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted # 내 데스크탑(FELIX) 러너 사용 - GitHub 클라우드 결제 한도/에러 100% 우회!
+    runs-on: ubuntu-latest
 
     steps:
-    # 1. GitHub에서 소스 코드 가져오기
+    # 1. 소스 코드 가져오기
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. 내 데스크탑 i9 CPU로 3초 만에 Flutter Web 빌드
+    # 2. Java 환경 설정
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    # 3. Flutter SDK 설치
+    - name: Setup Flutter SDK
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.47.2'
+        channel: 'stable'
+
+    # 4. Flutter Web 앱 빌드 (--base-href "/sudoku/")
     - name: Build Flutter Web
       run: |
-        $env:Path += ";C:\sdk\flutter\bin"
         flutter pub get
         flutter build web --base-href "/sudoku/"
 
-    # 3. N100 미니 PC로 빌드 결과물(build/web/*) SCP 자동 전송
+    # 5. N100 미니 PC로 빌드 결과물(build/web/*) SSH/SCP 자동 전송
     - name: Deploy build/web to N100 Mini PC
-      run: |
-        scp -r build/web/* felix530@192.168.35.137:/home/felix530/project/sudoku-web/
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.N100_HOST }}
+        username: ${{ secrets.N100_USER }}
+        key: ${{ secrets.N100_SSH_KEY }}
+        port: ${{ secrets.N100_PORT }}
+        source: "build/web/*"
+        target: "/home/felix530/project/sudoku-web"
+        strip_prefix: "build/web"
 
-    # 4. N100 미니 PC의 Docker 컨테이너 재시작
+    # 6. N100 미니 PC의 Docker 컨테이너 재시작
     - name: Restart N100 Docker Container
-      run: |
-        ssh felix530@192.168.35.137 "docker restart chloe-sudoku"
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.N100_HOST }}
+        username: ${{ secrets.N100_USER }}
+        key: ${{ secrets.N100_SSH_KEY }}
+        port: ${{ secrets.N100_PORT }}
+        script: |
+          docker restart chloe-sudoku
