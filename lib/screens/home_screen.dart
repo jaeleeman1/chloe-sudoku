@@ -520,14 +520,16 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               onPressed: _startNewGame,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('새 게임'),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
+              ),
+              child: const Text(
+                '새 게임',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
