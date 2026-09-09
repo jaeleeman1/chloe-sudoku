@@ -27,6 +27,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // 메모 모드 글로벌 상태
   bool _isGlobalMemoMode = false;
 
+  // 실수(오답) 차감 카운트
+  int _mistakeCount = 0;
+
+  // 점수 산출 규칙 오버레이 카드 토글 상태
+  bool _showScoreOverlay = false;
+
   // Undo (되돌리기) 히스토리 스택
   final List<SudokuGrid> _undoHistory = [];
 
@@ -97,6 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _timer?.cancel();
     _startTime = DateTime.now();
     _elapsedSeconds = 0;
+    _mistakeCount = 0;
+    _showScoreOverlay = false;
     _undoHistory.clear();
     _isGlobalMemoMode = false;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -181,8 +189,12 @@ class _HomeScreenState extends State<HomeScreen> {
             targetCell.memos.add(number);
           }
         } else {
-          // 메모 버튼을 한번 더 눌러 일반 모드로 전환된 상태 -> 일반 표준 숫자 입력
-          // 기존에 메모나 핑크색이 있었다면 모두 사라지고 일반 숫자가 입력됨!
+          // 일반 모드인 상태에서 숫자를 누르면
+          List<List<int>> tempGrid = _grid.toIntGrid();
+          tempGrid[_selectedRow!][_selectedCol!] = 0;
+          if (!_engine.isValid(tempGrid, _selectedRow!, _selectedCol!, number)) {
+            _mistakeCount++;
+          }
           _grid.set(_selectedRow!, _selectedCol!, number);
           _autoRemoveMemoNumbers(_selectedRow!, _selectedCol!, number);
           _validateGrid();
@@ -263,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  int _calculateFinalScore(int totalSeconds) {
+  int _calculateLiveScore(int totalSeconds) {
     int baseScore = _getBaseScore(_currentDifficulty);
     int targetSeconds;
 
@@ -281,22 +293,22 @@ class _HomeScreenState extends State<HomeScreen> {
         targetSeconds = 180;
     }
 
+    int timeScore;
     if (totalSeconds <= targetSeconds) {
-      return baseScore + (targetSeconds - totalSeconds);
+      timeScore = baseScore + (targetSeconds - totalSeconds);
     } else {
       int penalty = totalSeconds - targetSeconds;
-      int score = baseScore - penalty;
-      return score < 0 ? 0 : score;
+      timeScore = baseScore - penalty;
     }
+
+    int score = (timeScore - _mistakeCount) * _difficultyMultiplier;
+    return score < 0 ? 0 : score;
   }
 
   void _checkCompletion() {
     if (_engine.isGridComplete(_grid.toIntGrid())) {
       _timer?.cancel();
-      int baseScore = _getBaseScore(_currentDifficulty);
-      int calculatedScore = _calculateFinalScore(_elapsedSeconds);
-      int multiplier = _difficultyMultiplier;
-      int finalScore = calculatedScore * multiplier;
+      int finalScore = _calculateLiveScore(_elapsedSeconds);
 
       showDialog(
         context: context,
@@ -544,253 +556,276 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                          decoration: BoxDecoration(
+              child: Column(
+                children: [
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 난이도 선택 버튼
+                          PopupMenuButton<String>(
+                            initialValue: _currentDifficulty,
+                            onSelected: (String level) {
+                              if (_currentDifficulty != level) {
+                                setState(() {
+                                  _currentDifficulty = level;
+                                  _startNewGame();
+                                });
+                              }
+                            },
                             color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // 난이도 선택 버튼
-                              PopupMenuButton<String>(
-                                initialValue: _currentDifficulty,
-                                onSelected: (String level) {
-                                  if (_currentDifficulty != level) {
-                                    setState(() {
-                                      _currentDifficulty = level;
-                                      _startNewGame();
-                                    });
-                                  }
-                                },
-                                color: Colors.blue.shade50,
-                                elevation: 6,
-                                shadowColor: Colors.blue.shade200.withOpacity(0.5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(color: Colors.blue.shade200, width: 1.0),
-                                ),
-                                itemBuilder: (context) => [
-                                  _buildMenuItem('초급', Icons.sentiment_satisfied_alt, Colors.blue.shade600),
-                                  _buildMenuItem('중급', Icons.sentiment_neutral, Colors.indigo.shade600),
-                                  _buildMenuItem('고급', Icons.local_fire_department, Colors.deepPurple.shade600),
+                            elevation: 6,
+                            shadowColor: Colors.blue.shade200.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Colors.blue.shade200, width: 1.0),
+                            ),
+                            itemBuilder: (context) => [
+                              _buildMenuItem('초급', Icons.sentiment_satisfied_alt, Colors.blue.shade600),
+                              _buildMenuItem('중급', Icons.sentiment_neutral, Colors.indigo.shade600),
+                              _buildMenuItem('고급', Icons.local_fire_department, Colors.deepPurple.shade600),
+                            ],
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.blue.shade300, width: 1.2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.shade100,
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
                                 ],
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.blue.shade300, width: 1.2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue.shade100,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        _currentDifficulty,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue.shade800,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Icon(Icons.arrow_drop_down, color: Colors.blue.shade800, size: 20),
-                                    ],
-                                  ),
-                                ),
                               ),
-                              // 점수 (스코어) & 툴팁/팝업
-                              Tooltip(
-                                message: '🏆 점수 산출 규칙 (기본 점수 / 기준시간)\n'
-                                    '• 초급: 100점 / 3분 (180초)\n'
-                                    '• 중급: 300점 / 6분 (360초)\n'
-                                    '• 고급: 600점 / 10분 (600초)\n\n'
-                                    '⭐ 점수 계산 방식\n'
-                                    '• 기준 시간 이내 성공: 기본 점수 + (기준 시간 - 해결 시간)\n'
-                                    '• 기준 시간 이후 성공: 기본 점수 - (해결 시간 - 기준 시간)\n'
-                                    '• 실패/새로고침: 0점 처리',
-                                padding: const EdgeInsets.all(12),
-                                margin: const EdgeInsets.symmetric(horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade900.withOpacity(0.95),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
-                                  height: 1.5,
-                                ),
-                                preferBelow: false,
-                                triggerMode: TooltipTriggerMode.tap,
-                                child: MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.amber.shade300),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '기본 점수: ${_getBaseScore(_currentDifficulty)}점',
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Icon(Icons.info_outline, size: 14, color: Colors.amber.shade900),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // 경과 시간
-                              Row(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.timer_outlined, size: 16, color: Colors.deepOrange),
+                                  Text(
+                                    _currentDifficulty,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Icon(Icons.arrow_drop_down, color: Colors.blue.shade800, size: 20),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // 실시간 점수 버튼 (클릭 시 툴팁 오버라이드 카드 토글)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showScoreOverlay = !_showScoreOverlay;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.amber.shade300),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '경과: ${_formatDuration(_elapsedSeconds)}',
+                                    '점수: ${_calculateLiveScore(_elapsedSeconds)}점',
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
                                   ),
+                                  const SizedBox(width: 2),
+                                  Icon(Icons.info_outline, size: 14, color: Colors.amber.shade900),
                                 ],
+                              ),
+                            ),
+                          ),
+                          // 경과 시간
+                          Row(
+                            children: [
+                              const Icon(Icons.timer_outlined, size: 16, color: Colors.deepOrange),
+                              const SizedBox(width: 4),
+                              Text(
+                                '경과: ${_formatDuration(_elapsedSeconds)}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
                               ),
                             ],
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Center(
-                        child: SizedBox(
-                          width: boardSize,
-                          height: boardSize,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 2),
+                    ),
+                  ),
+                  if (_showScoreOverlay) ...[
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showScoreOverlay = false;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade900.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
                             ),
-                            child: GridView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 81,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 9,
-                              ),
-                              itemBuilder: (context, index) {
-                                int r = index ~/ 9;
-                                int c = index % 9;
-                                return SudokuCellWidget(
-                                  cell: _grid.cells[r][c],
-                                  row: r,
-                                  col: c,
-                                  isSelected: r == _selectedRow && c == _selectedCol,
-                                  isRelated: _isRelated(r, c),
-                                  onTap: () => _onCellTap(r, c),
-                                );
-                              },
-                            ),
-                          ),
+                          ],
                         ),
-                      ),
-                      const Spacer(),
-                      // 메모 & 되돌리기 버튼 (숫자 패드 바로 위)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _onToggleMemoMode,
-                                icon: Icon(
-                                  Icons.edit_note,
-                                  color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade700,
-                                ),
-                                label: Text(
-                                  '메모',
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text(
+                                  '🏆 점수 산출 규칙',
                                   style: TextStyle(
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade800,
+                                    color: Colors.white,
                                   ),
                                 ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: _isGlobalMemoMode ? const Color(0xFFFFEFF2) : Colors.white,
-                                  side: BorderSide(
-                                    color: _isGlobalMemoMode ? Colors.pink.shade300 : Colors.blue.shade300,
-                                    width: 1.5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                ),
-                              ),
+                                Icon(Icons.close, size: 16, color: Colors.white70),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _undoHistory.isNotEmpty ? _onUndo : null,
-                                icon: Icon(
-                                  Icons.undo_rounded,
-                                  color: _undoHistory.isNotEmpty ? Colors.blue.shade700 : Colors.grey,
-                                ),
-                                label: Text(
-                                  '되돌리기',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: _undoHistory.isNotEmpty ? Colors.blue.shade800 : Colors.grey,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  side: BorderSide(
-                                    color: _undoHistory.isNotEmpty ? Colors.blue.shade300 : Colors.grey.shade300,
-                                    width: 1.5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                ),
-                              ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              '• 초급: 100점 / 3분 (180초)\n'
+                              '• 중급: 300점 / 6분 (360초)\n'
+                              '• 고급: 600점 / 10분 (600초)\n\n'
+                              '⭐ 점수 계산 방식\n'
+                              '• 기준 시간 이내 성공: 기본 점수 + (기준 시간 - 해결 시간)\n'
+                              '• 기준 시간 초과 성공: 기본 점수 - (해결 시간 - 기준 시간)\n'
+                              '• 오답 입력 패널티: 오답 1회당 -1점 감점\n'
+                              '• 실패/미완성/새로고침: 0점 처리',
+                              style: TextStyle(fontSize: 11, color: Colors.white70, height: 1.4),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      NumberPad(
-                        onNumberSelected: _onNumberSelected,
-                        onClear: _onClear,
-                        completedNumbers: _completedNumbers,
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Center(
+                    child: SizedBox(
+                      width: boardSize,
+                      height: boardSize,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                        ),
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: 81,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 9,
+                          ),
+                          itemBuilder: (context, index) {
+                            int r = index ~/ 9;
+                            int c = index % 9;
+                            return SudokuCellWidget(
+                              cell: _grid.cells[r][c],
+                              row: r,
+                              col: c,
+                              isSelected: r == _selectedRow && c == _selectedCol,
+                              isRelated: _isRelated(r, c),
+                              onTap: () => _onCellTap(r, c),
+                            );
+                          },
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  // 메모 & 되돌리기 버튼 (숫자 패드 바로 위)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _onToggleMemoMode,
+                            icon: Icon(
+                              Icons.edit_note,
+                              color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade700,
+                            ),
+                            label: Text(
+                              '메모',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade800,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: _isGlobalMemoMode ? const Color(0xFFFFEFF2) : Colors.white,
+                              side: BorderSide(
+                                color: _isGlobalMemoMode ? Colors.pink.shade300 : Colors.blue.shade300,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _undoHistory.isNotEmpty ? _onUndo : null,
+                            icon: Icon(
+                              Icons.undo_rounded,
+                              color: _undoHistory.isNotEmpty ? Colors.blue.shade700 : Colors.grey,
+                            ),
+                            label: Text(
+                              '되돌리기',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _undoHistory.isNotEmpty ? Colors.blue.shade800 : Colors.grey,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: BorderSide(
+                                color: _undoHistory.isNotEmpty ? Colors.blue.shade300 : Colors.grey.shade300,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  NumberPad(
+                    onNumberSelected: _onNumberSelected,
+                    onClear: _onClear,
+                    completedNumbers: _completedNumbers,
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
             );
           },
