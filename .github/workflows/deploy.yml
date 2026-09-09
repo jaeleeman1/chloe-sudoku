@@ -3,10 +3,11 @@ name: Build & Deploy Chloe Sudoku to N100 Mini PC
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # GitHub 웹사이트에서 'Run workflow' 버튼으로 언제든지 수동 재실행 가능!
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # GitHub 클라우드 무상 서버 자동 가동!
 
     steps:
     # 1. 소스 코드 가져오기
