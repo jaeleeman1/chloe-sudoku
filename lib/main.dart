@@ -11,7 +11,7 @@ class ChloeSudokuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chloe Sudoku^^',
+      title: 'Chloe Sudoku',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
