@@ -21,12 +21,25 @@ jobs:
         flutter pub get
         flutter build web --base-href "/sudoku/"
 
-    # 3. N100 미니 PC로 빌드 결과물(build/web/*) SCP 자동 전송
+    # 3. N100 미니 PC로 빌드 결과물(build/web/*) SSH/SCP 자동 전송
     - name: Deploy build/web to N100 Mini PC
-      run: |
-        scp -r build/web/* felix530@192.168.35.137:/home/felix530/project/sudoku-web/
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.N100_HOST }}
+        username: ${{ secrets.N100_USER }}
+        key: ${{ secrets.N100_SSH_KEY }}
+        port: ${{ secrets.N100_PORT }}
+        source: "build/web/*"
+        target: "/home/felix530/project/sudoku-web"
+        strip_prefix: "build/web"
 
     # 4. N100 미니 PC의 Docker 컨테이너 재시작
     - name: Restart N100 Docker Container
-      run: |
-        ssh felix530@192.168.35.137 "docker restart chloe-sudoku"
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.N100_HOST }}
+        username: ${{ secrets.N100_USER }}
+        key: ${{ secrets.N100_SSH_KEY }}
+        port: ${{ secrets.N100_PORT }}
+        script: |
+          docker restart chloe-sudoku
