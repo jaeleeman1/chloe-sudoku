@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest # GitHub 클라우드 무료 서버 사용 (내 데스크탑 러너 필요 없음!)
 
     steps:
     # 1. 소스 코드 가져오기
@@ -34,7 +34,7 @@ jobs:
         flutter pub get
         flutter build web --base-href "/sudoku/"
 
-    # 5. N100 미니 PC로 빌드 결과물(build/web/*) SSH/SCP 자동 전송
+    # 5. N100 미니 PC로 빌드 결과물(build/web/**) 재귀 하위 폴더 전체 SSH/SCP 자동 전송
     - name: Deploy build/web to N100 Mini PC
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -42,7 +42,7 @@ jobs:
         username: ${{ secrets.N100_USER }}
         key: ${{ secrets.N100_SSH_KEY }}
         port: ${{ secrets.N100_PORT }}
-        source: "build/web/*"
+        source: "build/web/**"
         target: "/home/felix530/project/sudoku-web"
         strip_prefix: "build/web"
 
