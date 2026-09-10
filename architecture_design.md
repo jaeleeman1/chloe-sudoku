@@ -58,12 +58,28 @@ flowchart TD
 
 ### 4.1 Docker 구동 명령어 (N100 서버 터미널)
 ```bash
-docker run -d --name chloe-sudoku --restart always -p 9080:80 -v /home/felix530/sudoku-web:/usr/share/nginx/html:ro nginx:alpine
+docker run -d --name chloe-sudoku --restart always -p 9080:80 -v /home/felix530/project/sudoku-web:/usr/share/nginx/html:ro nginx:alpine
 ```
 
 ---
 
-## 5. 라즈베리파이 Nginx 최종 라우팅 구문 (`/etc/nginx/sites-available/immich`)
+## 5. 비밀번호 없는 무인 SSH 자동 배포 등록 가이드 (Passwordless SSH)
+
+데스크탑에서 N100 미니 PC로 SCP 파일 전송 및 SSH Docker 재시작 명령을 내릴 때, **비밀번호를 입력받지 않고 3초 만에 무인 자동 배포**가 수행되도록 SSH 공개키를 등록하는 방법입니다.
+
+### 5.1 데스크탑 SSH 공개키 (Public Key)
+```text
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICQdtFbW26vZ2bnpIjcjDfD8T0CGNC61ApW7gt2XGsQr fromj@felix
+```
+
+### 5.2 N100 미니 PC 터미널 등록 명령어 (MobaXterm 실행)
+```bash
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICQdtFbW26vZ2bnpIjcjDfD8T0CGNC61ApW7gt2XGsQr fromj@felix" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+```
+
+---
+
+## 6. 라즈베리파이 Nginx 최종 라우팅 구문 (`/etc/nginx/sites-available/immich`)
 
 ```nginx
 server {
