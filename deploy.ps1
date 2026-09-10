@@ -1,9 +1,12 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 Write-Host "🚀 Chloe Sudoku 자동 배포 시작..." -ForegroundColor Cyan
 
-# 1. Flutter Web 빌드
+# 1. Flutter Web 빌드 (--no-tree-shake-icons 옵션 적용)
 $env:Path += ";C:\sdk\flutter\bin"
 flutter pub get
-flutter build web --base-href "/sudoku/"
+flutter build web --base-href "/sudoku/" --no-tree-shake-icons
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Flutter Web 빌드 실패" -ForegroundColor Red
