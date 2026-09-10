@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # Public 저장소이므로 GitHub 클라우드가 100% 자동 가동!
+    runs-on: self-hosted
 
     steps:
     # 1. 소스 코드 가져오기
