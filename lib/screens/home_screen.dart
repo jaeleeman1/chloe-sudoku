@@ -510,41 +510,47 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF8EF),
         centerTitle: true,
-        leadingWidth: 95.0,
+        leadingWidth: 80.0,
         leading: const SizedBox.shrink(),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
             Text(
               '🐰 ',
-              style: TextStyle(fontSize: 22),
+              style: TextStyle(fontSize: 21),
             ),
             Text(
               'Chloe Sudoku',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 21,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF776E65),
               ),
             ),
             Text(
               ' 🥕',
-              style: TextStyle(fontSize: 22),
+              style: TextStyle(fontSize: 21),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: OutlinedButton.icon(
               onPressed: _startNewGame,
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('새 게임'),
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text(
+                '새 게임',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
               style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: const Color(0xFF776E65),
-                side: const BorderSide(color: Color(0xFFBBADA0), width: 1.5),
+                side: const BorderSide(color: Color(0xFFBBADA0), width: 1.2),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -645,7 +651,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   const SizedBox(width: 2),
-                                  const Icon(Icons.info_outline, size: 12, color: Color(0xFFEEE4DA)),
+                                  const Text(
+                                    ' (클릭)',
+                                    style: TextStyle(fontSize: 10, color: Color(0xFFEEE4DA)),
+                                  ),
                                 ],
                               ),
                             ),
