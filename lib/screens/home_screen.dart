@@ -491,49 +491,28 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFFAF8EF),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF8EF),
-        centerTitle: false,
-        titleSpacing: 12.0,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEEE4DA),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.grid_3x3_rounded,
-                color: Color(0xFF776E65),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Chloe Sudoku',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF776E65),
-              ),
-            ),
-          ],
+        centerTitle: true,
+        title: const Text(
+          'Chloe Sudoku',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF776E65),
+          ),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: OutlinedButton(
+            child: OutlinedButton.icon(
               onPressed: _startNewGame,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('새 게임'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF776E65),
                 side: const BorderSide(color: Color(0xFFBBADA0), width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              child: const Text(
-                '새 게임',
-                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
