@@ -511,13 +511,22 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF8EF),
         centerTitle: true,
-        title: const Text(
-          'Chloe Sudoku',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF776E65),
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              '🐰 ',
+              style: TextStyle(fontSize: 22),
+            ),
+            Text(
+              'Chloe Sudoku',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF776E65),
+              ),
+            ),
+          ],
         ),
         actions: [
           Padding(
@@ -552,7 +561,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFBBADA0),
                         borderRadius: BorderRadius.circular(12),
@@ -582,7 +591,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               _buildMenuItem('고급', Icons.local_fire_department, const Color(0xFF8F7A66)),
                             ],
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
@@ -609,25 +618,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // 2. 최고점수 버튼 (점수 버튼 좌측)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF776E65),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.emoji_events_rounded, size: 16, color: Color(0xFFEDC22E)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '최고점수: $_bestScore점',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // 3. 실시간 점수 버튼
+                          // 2. 실시간 점수 버튼
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -635,7 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
@@ -654,9 +645,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // 4. 경과 시간 카드
+                          // 3. 경과시간 카드
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: const Color(0xFF776E65),
                               borderRadius: BorderRadius.circular(8),
@@ -666,7 +657,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const Icon(Icons.timer_outlined, size: 16, color: Color(0xFFF2B179)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '경과: ${_formatDuration(_elapsedSeconds)}',
+                                  '경과시간: ${_formatDuration(_elapsedSeconds)}',
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ],
@@ -703,19 +694,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
+                              children: [
                                 Text(
-                                  '🏆 점수 산출 규칙',
-                                  style: TextStyle(
-                                    fontSize: 13,
+                                  '🏆 최고점수: $_bestScore점',
+                                  style: const TextStyle(
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: Color(0xFFEDC22E),
                                   ),
                                 ),
-                                Icon(Icons.close, size: 16, color: Color(0xFFEEE4DA)),
+                                const Icon(Icons.close, size: 16, color: Color(0xFFEEE4DA)),
                               ],
                             ),
-                            const SizedBox(height: 6),
+                            const Divider(height: 12, thickness: 1, color: Color(0xFF8F7A66)),
                             const Text(
                               '• 초급: 100점 / 3분 (180초)\n'
                               '• 중급: 300점 / 6분 (360초)\n'
