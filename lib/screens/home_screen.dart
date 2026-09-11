@@ -178,7 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         if (_isGlobalMemoMode) {
-          // 메모 모드가 활성화되어 있을 때 -> 후보 메모 숫자 입력
           targetCell.isMemoMode = true;
           if (targetCell.memos.contains(number)) {
             targetCell.memos.remove(number);
@@ -189,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
             targetCell.memos.add(number);
           }
         } else {
-          // 일반 모드인 상태에서 숫자를 누르면
           List<List<int>> tempGrid = _grid.toIntGrid();
           tempGrid[_selectedRow!][_selectedCol!] = 0;
           if (!_engine.isValid(tempGrid, _selectedRow!, _selectedCol!, number)) {
@@ -323,68 +321,64 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(24),
           ),
           elevation: 10,
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFFAF8EF),
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFFAF8EF),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.blue.shade200, width: 2),
+              border: Border.all(color: const Color(0xFFBBADA0), width: 2),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 축하 헤더 아이콘
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEEE4DA),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.emoji_events_rounded,
                     size: 48,
-                    color: Colors.amber.shade700,
+                    color: Color(0xFFEDC22E),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   '축하합니다!',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
-                    color: Colors.blue.shade900,
+                    color: Color(0xFF776E65),
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
+                const Text(
                   '스도쿠를 성공적으로 완성하셨습니다 🎉',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade700,
+                    color: Color(0xFF776E65),
                   ),
                 ),
                 const SizedBox(height: 20),
-                // 결과 카드 (파란색 테마)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: const Color(0xFFBBADA0),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Column(
                     children: [
-                      _buildResultRow('난이도', '$_currentDifficulty', Colors.blue.shade900),
-                      const Divider(height: 16, thickness: 1),
-                      _buildResultRow('경과 시간', _formatDuration(_elapsedSeconds), Colors.black87),
-                      const Divider(height: 16, thickness: 1),
-                      _buildResultRow('최종 점수', '$finalScore점 ⭐', Colors.indigo.shade900, isBold: true),
+                      _buildResultRow('난이도', '$_currentDifficulty', Colors.white),
+                      const Divider(height: 16, thickness: 1, color: Color(0xFFEEE4DA)),
+                      _buildResultRow('경과 시간', _formatDuration(_elapsedSeconds), const Color(0xFFEEE4DA)),
+                      const Divider(height: 16, thickness: 1, color: Color(0xFFEEE4DA)),
+                      _buildResultRow('최종 점수', '$finalScore점 ⭐', const Color(0xFFEDC22E), isBold: true),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                // 새 게임 버튼
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -402,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade700,
+                      backgroundColor: const Color(0xFF8F7A66),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -428,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            color: Colors.blue.shade900,
+            color: const Color(0xFFEEE4DA),
           ),
         ),
         Text(
@@ -450,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade100 : Colors.transparent,
+          color: isSelected ? const Color(0xFFEDC22E) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -458,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.blue.shade900 : iconColor,
+              color: isSelected ? Colors.white : iconColor,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -467,12 +461,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.blue.shade900 : Colors.blue.shade800,
+                  color: isSelected ? Colors.white : const Color(0xFF776E65),
                 ),
               ),
             ),
             if (isSelected)
-              Icon(Icons.check, size: 16, color: Colors.blue.shade800),
+              const Icon(Icons.check, size: 16, color: Colors.white),
           ],
         ),
       ),
@@ -494,7 +488,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF8EF),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFFAF8EF),
         centerTitle: false,
         titleSpacing: 12.0,
         title: Row(
@@ -503,33 +499,22 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.blue.shade100,
+                color: const Color(0xFFEEE4DA),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.grid_3x3_rounded,
-                color: Colors.blue.shade900,
+                color: Color(0xFF776E65),
                 size: 20,
               ),
             ),
             const SizedBox(width: 8),
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [
-                  Colors.blue.shade900,
-                  Colors.indigo.shade700,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ).createShader(bounds),
-              child: const Text(
-                'Chloe Sudoku',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                  color: Colors.white,
-                ),
+            const Text(
+              'Chloe Sudoku',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF776E65),
               ),
             ),
           ],
@@ -540,8 +525,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: OutlinedButton(
               onPressed: _startNewGame,
               style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF776E65),
+                side: const BorderSide(color: Color(0xFFBBADA0), width: 1.5),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: const Text(
@@ -569,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: const Color(0xFFBBADA0),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -586,50 +573,40 @@ class _HomeScreenState extends State<HomeScreen> {
                                 });
                               }
                             },
-                            color: Colors.blue.shade50,
+                            color: const Color(0xFFFAF8EF),
                             elevation: 6,
-                            shadowColor: Colors.blue.shade200.withOpacity(0.5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: Colors.blue.shade200, width: 1.0),
                             ),
                             itemBuilder: (context) => [
-                              _buildMenuItem('초급', Icons.sentiment_satisfied_alt, Colors.blue.shade600),
-                              _buildMenuItem('중급', Icons.sentiment_neutral, Colors.indigo.shade600),
-                              _buildMenuItem('고급', Icons.local_fire_department, Colors.deepPurple.shade600),
+                              _buildMenuItem('초급', Icons.sentiment_satisfied_alt, const Color(0xFF8F7A66)),
+                              _buildMenuItem('중급', Icons.sentiment_neutral, const Color(0xFF8F7A66)),
+                              _buildMenuItem('고급', Icons.local_fire_department, const Color(0xFF8F7A66)),
                             ],
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.blue.shade300, width: 1.2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.blue.shade100,
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
+                                color: const Color(0xFF776E65),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     _currentDifficulty,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blue.shade800,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 2),
-                                  Icon(Icons.arrow_drop_down, color: Colors.blue.shade800, size: 20),
+                                  const Icon(Icons.arrow_drop_down, color: Color(0xFFEEE4DA), size: 20),
                                 ],
                               ),
                             ),
                           ),
-                          // 실시간 점수 버튼 (클릭 시 툴팁 오버라이드 카드 토글)
+                          // 실시간 점수 버튼
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -637,36 +614,42 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade50,
+                                color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.amber.shade300),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.stars_rounded, size: 18, color: Colors.amber),
+                                  const Icon(Icons.stars_rounded, size: 18, color: Color(0xFFEDC22E)),
                                   const SizedBox(width: 4),
                                   Text(
                                     '점수: ${_getCurrentGameScore()}점',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   const SizedBox(width: 2),
-                                  Icon(Icons.info_outline, size: 14, color: Colors.amber.shade900),
+                                  const Icon(Icons.info_outline, size: 14, color: Color(0xFFEEE4DA)),
                                 ],
                               ),
                             ),
                           ),
-                          // 경과 시간
-                          Row(
-                            children: [
-                              const Icon(Icons.timer_outlined, size: 16, color: Colors.deepOrange),
-                              const SizedBox(width: 4),
-                              Text(
-                                '경과: ${_formatDuration(_elapsedSeconds)}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
-                              ),
-                            ],
+                          // 경과 시간 카드
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF776E65),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.timer_outlined, size: 16, color: Color(0xFFF2B179)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '경과: ${_formatDuration(_elapsedSeconds)}',
+                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -684,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 10.0),
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade900.withOpacity(0.95),
+                          color: const Color(0xFF776E65),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -708,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Colors.white,
                                   ),
                                 ),
-                                Icon(Icons.close, size: 16, color: Colors.white70),
+                                Icon(Icons.close, size: 16, color: Color(0xFFEEE4DA)),
                               ],
                             ),
                             const SizedBox(height: 6),
@@ -721,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               '• 기준 시간 초과 성공: 기본 점수 - (해결 시간 - 기준 시간)\n'
                               '• 오답 입력 패널티: 오답 1회당 -1점 감점\n'
                               '• 실패/미완성/새로고침: 0점 처리',
-                              style: TextStyle(fontSize: 11, color: Colors.white70, height: 1.4),
+                              style: TextStyle(fontSize: 11, color: Color(0xFFEEE4DA), height: 1.4),
                             ),
                           ],
                         ),
@@ -735,8 +718,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: boardSize,
                       child: Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 2),
+                          color: const Color(0xFFBBADA0),
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        padding: const EdgeInsets.all(6),
                         child: GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: 81,
@@ -760,7 +745,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // 메모 & 되돌리기 버튼 (숫자 패드 바로 위)
+                  // 메모 & 되돌리기 버튼
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
                     child: Row(
@@ -770,19 +755,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: _onToggleMemoMode,
                             icon: Icon(
                               Icons.edit_note,
-                              color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade700,
+                              color: _isGlobalMemoMode ? Colors.white : const Color(0xFF776E65),
                             ),
                             label: Text(
                               '메모',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: _isGlobalMemoMode ? Colors.pink.shade700 : Colors.blue.shade800,
+                                color: _isGlobalMemoMode ? Colors.white : const Color(0xFF776E65),
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: _isGlobalMemoMode ? const Color(0xFFFFEFF2) : Colors.white,
+                              backgroundColor: _isGlobalMemoMode ? const Color(0xFFF2B179) : const Color(0xFFEEE4DA),
                               side: BorderSide(
-                                color: _isGlobalMemoMode ? Colors.pink.shade300 : Colors.blue.shade300,
+                                color: _isGlobalMemoMode ? const Color(0xFFF59563) : const Color(0xFFD6CDC4),
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(
@@ -798,19 +783,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: _undoHistory.isNotEmpty ? _onUndo : null,
                             icon: Icon(
                               Icons.undo_rounded,
-                              color: _undoHistory.isNotEmpty ? Colors.blue.shade700 : Colors.grey,
+                              color: _undoHistory.isNotEmpty ? const Color(0xFF776E65) : Colors.grey,
                             ),
                             label: Text(
                               '되돌리기',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: _undoHistory.isNotEmpty ? Colors.blue.shade800 : Colors.grey,
+                                color: _undoHistory.isNotEmpty ? const Color(0xFF776E65) : Colors.grey,
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: BorderSide(
-                                color: _undoHistory.isNotEmpty ? Colors.blue.shade300 : Colors.grey.shade300,
+                              backgroundColor: const Color(0xFFEEE4DA),
+                              side: const BorderSide(
+                                color: Color(0xFFD6CDC4),
                                 width: 1.5,
                               ),
                               shape: RoundedRectangleBorder(

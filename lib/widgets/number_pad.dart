@@ -64,13 +64,13 @@ class NumberPad extends StatelessWidget {
         onPressed: () => onNumberSelected(number),
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
-          backgroundColor: isCompleted ? Colors.amber.shade300 : Colors.blue.shade50,
-          foregroundColor: isCompleted ? Colors.brown.shade900 : Colors.blue.shade900,
-          elevation: isCompleted ? 2 : 1,
+          backgroundColor: isCompleted ? const Color(0xFFEDC22E) : const Color(0xFFEEE4DA),
+          foregroundColor: isCompleted ? Colors.white : const Color(0xFF776E65),
+          elevation: isCompleted ? 3 : 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(
-              color: isCompleted ? Colors.amber.shade600 : Colors.blue.shade200,
+              color: isCompleted ? const Color(0xFFEDC53F) : const Color(0xFFD6CDC4),
               width: isCompleted ? 1.5 : 1.0,
             ),
           ),
@@ -81,7 +81,7 @@ class NumberPad extends StatelessWidget {
             '$number',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isCompleted ? FontWeight.bold : FontWeight.bold,
             ),
           ),
         ),
@@ -96,16 +96,16 @@ class NumberPad extends StatelessWidget {
         onPressed: onClear,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
-          backgroundColor: Colors.orange[100],
+          backgroundColor: const Color(0xFFF2B179),
           elevation: 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: Colors.orange.shade300, width: 1.0),
+            side: const BorderSide(color: Color(0xFFF59563), width: 1.0),
           ),
         ),
         child: const FittedBox(
           fit: BoxFit.scaleDown,
-          child: Icon(Icons.backspace_outlined, color: Colors.orange, size: 18),
+          child: Icon(Icons.backspace_outlined, color: Colors.white, size: 18),
         ),
       ),
     );

@@ -21,54 +21,54 @@ class SudokuCellWidget extends StatelessWidget {
 
   BorderSide _getTopBorder() {
     if (row == 0) {
-      return const BorderSide(color: Colors.black, width: 2.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 2.5);
     } else if (row % 3 == 0) {
-      return BorderSide(color: Colors.grey[600]!, width: 1.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 1.5);
     } else {
-      return BorderSide(color: Colors.grey[300]!, width: 0.5);
+      return const BorderSide(color: Color(0xFFD6CDC4), width: 0.8);
     }
   }
 
   BorderSide _getLeftBorder() {
     if (col == 0) {
-      return const BorderSide(color: Colors.black, width: 2.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 2.5);
     } else if (col % 3 == 0) {
-      return BorderSide(color: Colors.grey[600]!, width: 1.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 1.5);
     } else {
-      return BorderSide(color: Colors.grey[300]!, width: 0.5);
+      return const BorderSide(color: Color(0xFFD6CDC4), width: 0.8);
     }
   }
 
   BorderSide _getRightBorder() {
     if (col == 8) {
-      return const BorderSide(color: Colors.black, width: 2.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 2.5);
     } else if ((col + 1) % 3 == 0) {
-      return BorderSide(color: Colors.grey[600]!, width: 1.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 1.5);
     } else {
-      return BorderSide(color: Colors.grey[300]!, width: 0.5);
+      return const BorderSide(color: Color(0xFFD6CDC4), width: 0.8);
     }
   }
 
   BorderSide _getBottomBorder() {
     if (row == 8) {
-      return const BorderSide(color: Colors.black, width: 2.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 2.5);
     } else if ((row + 1) % 3 == 0) {
-      return BorderSide(color: Colors.grey[600]!, width: 1.0);
+      return const BorderSide(color: Color(0xFF776E65), width: 1.5);
     } else {
-      return BorderSide(color: Colors.grey[300]!, width: 0.5);
+      return const BorderSide(color: Color(0xFFD6CDC4), width: 0.8);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    Color textColor = cell.isFixed ? Colors.black : Colors.blue[800]!;
-    if (cell.isInvalid) textColor = Colors.red;
+    Color textColor = cell.isFixed ? const Color(0xFF776E65) : const Color(0xFF8F7A66);
+    if (cell.isInvalid) textColor = Colors.red.shade700;
 
     Color backgroundColor = Colors.white;
     if (isSelected) {
-      backgroundColor = Colors.blue[200]!;
+      backgroundColor = const Color(0xFFF2B179); // Warm 2048 Amber Highlight
     } else if (isRelated) {
-      backgroundColor = Colors.grey[200]!;
+      backgroundColor = const Color(0xFFEEE4DA); // Soft Cream Cross Highlight
     }
 
     Widget content;
@@ -78,8 +78,8 @@ class SudokuCellWidget extends StatelessWidget {
           '${cell.value}',
           style: TextStyle(
             fontSize: 24,
-            fontWeight: cell.isFixed ? FontWeight.bold : FontWeight.normal,
-            color: textColor,
+            fontWeight: cell.isFixed ? FontWeight.w900 : FontWeight.bold,
+            color: isSelected ? Colors.white : textColor,
           ),
         ),
       );
