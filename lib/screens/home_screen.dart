@@ -24,6 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _elapsedSeconds = 0;
   Timer? _timer;
 
+  // 최고점수 스코어
+  int _bestScore = 0;
+
   // 메모 모드 글로벌 상태
   bool _isGlobalMemoMode = false;
 
@@ -59,6 +62,19 @@ class _HomeScreenState extends State<HomeScreen> {
         return 3;
       default:
         return 1;
+    }
+  }
+
+  String get _difficultyEmoji {
+    switch (_currentDifficulty) {
+      case '초급':
+        return '🌱';
+      case '중급':
+        return '⚡';
+      case '고급':
+        return '🔥';
+      default:
+        return '🌱';
     }
   }
 
@@ -312,6 +328,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_engine.isGridComplete(_grid.toIntGrid())) {
       _timer?.cancel();
       int finalScore = _calculateFinalScore(_elapsedSeconds);
+      if (finalScore > _bestScore) {
+        _bestScore = finalScore;
+      }
 
       showDialog(
         context: context,
@@ -533,15 +552,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFBBADA0),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // 난이도 선택 버튼
+                          // 1. 난이도 선택 버튼 (이모지 포함)
                           PopupMenuButton<String>(
                             initialValue: _currentDifficulty,
                             onSelected: (String level) {
@@ -563,7 +582,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               _buildMenuItem('고급', Icons.local_fire_department, const Color(0xFF8F7A66)),
                             ],
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
@@ -572,20 +591,43 @@ class _HomeScreenState extends State<HomeScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
+                                    _difficultyEmoji,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
                                     _currentDifficulty,
                                     style: const TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 2),
-                                  const Icon(Icons.arrow_drop_down, color: Color(0xFFEEE4DA), size: 20),
+                                  const Icon(Icons.arrow_drop_down, color: Color(0xFFEEE4DA), size: 18),
                                 ],
                               ),
                             ),
                           ),
-                          // 실시간 점수 버튼
+                          // 2. 최고점수 버튼 (점수 버튼 좌측)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF776E65),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.emoji_events_rounded, size: 16, color: Color(0xFFEDC22E)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '최고점수: $_bestScore점',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // 3. 실시간 점수 버튼
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -593,28 +635,28 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.stars_rounded, size: 18, color: Color(0xFFEDC22E)),
+                                  const Icon(Icons.stars_rounded, size: 16, color: Color(0xFFEDC22E)),
                                   const SizedBox(width: 4),
                                   Text(
                                     '점수: ${_getCurrentGameScore()}점',
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   const SizedBox(width: 2),
-                                  const Icon(Icons.info_outline, size: 14, color: Color(0xFFEEE4DA)),
+                                  const Icon(Icons.info_outline, size: 12, color: Color(0xFFEEE4DA)),
                                 ],
                               ),
                             ),
                           ),
-                          // 경과 시간 카드
+                          // 4. 경과 시간 카드
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                             decoration: BoxDecoration(
                               color: const Color(0xFF776E65),
                               borderRadius: BorderRadius.circular(8),
@@ -625,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 4),
                                 Text(
                                   '경과: ${_formatDuration(_elapsedSeconds)}',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ],
                             ),
