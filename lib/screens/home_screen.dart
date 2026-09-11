@@ -511,6 +511,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF8EF),
         centerTitle: true,
+        leadingWidth: 95.0,
+        leading: const SizedBox.shrink(),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
