@@ -456,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  PopupMenuItem<String> _buildMenuItem(String level, IconData icon, Color iconColor) {
+  PopupMenuItem<String> _buildMenuItem(String level, String emoji) {
     bool isSelected = _currentDifficulty == level;
     return PopupMenuItem<String>(
       value: level,
@@ -468,10 +468,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : iconColor,
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -528,6 +527,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Color(0xFF776E65),
               ),
             ),
+            Text(
+              ' 🥕',
+              style: TextStyle(fontSize: 22),
+            ),
           ],
         ),
         actions: [
@@ -571,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // 1. 난이도 선택 버튼 (이모지 포함)
+                          // 1. 난이도 선택 버튼 (컬러 이모지 포함)
                           PopupMenuButton<String>(
                             initialValue: _currentDifficulty,
                             onSelected: (String level) {
@@ -588,9 +591,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             itemBuilder: (context) => [
-                              _buildMenuItem('초급', Icons.sentiment_satisfied_alt, const Color(0xFF8F7A66)),
-                              _buildMenuItem('중급', Icons.sentiment_neutral, const Color(0xFF8F7A66)),
-                              _buildMenuItem('고급', Icons.local_fire_department, const Color(0xFF8F7A66)),
+                              _buildMenuItem('초급', '🌱'),
+                              _buildMenuItem('중급', '⚡'),
+                              _buildMenuItem('고급', '🔥'),
                             ],
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -647,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // 3. 경과시간 카드
+                          // 3. 시간 카드
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
@@ -659,7 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const Icon(Icons.timer_outlined, size: 16, color: Color(0xFFF2B179)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '경과시간: ${_formatDuration(_elapsedSeconds)}',
+                                  '시간: ${_formatDuration(_elapsedSeconds)}',
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ],
