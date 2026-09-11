@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _selectedRow;
   int? _selectedCol;
 
-  String _currentDifficulty = '초급';
+  String _currentDifficulty = 'easy';
 
   DateTime? _startTime;
   int _elapsedSeconds = 0;
@@ -41,11 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int get _difficultyRemovedCount {
     switch (_currentDifficulty) {
-      case '초급':
+      case 'easy':
         return 30;
-      case '중급':
+      case 'miduam':
         return 42;
-      case '고급':
+      case 'hard':
         return 52;
       default:
         return 30;
@@ -54,27 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int get _difficultyMultiplier {
     switch (_currentDifficulty) {
-      case '초급':
+      case 'easy':
         return 1;
-      case '중급':
+      case 'miduam':
         return 2;
-      case '고급':
+      case 'hard':
         return 3;
       default:
         return 1;
-    }
-  }
-
-  String get _difficultyEmoji {
-    switch (_currentDifficulty) {
-      case '초급':
-        return '🌱';
-      case '중급':
-        return '⚡';
-      case '고급':
-        return '🔥';
-      default:
-        return '🌱';
     }
   }
 
@@ -278,11 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _getBaseScore(String difficulty) {
     switch (difficulty) {
-      case '초급':
+      case 'easy':
         return 100;
-      case '중급':
+      case 'miduam':
         return 300;
-      case '고급':
+      case 'hard':
         return 600;
       default:
         return 100;
@@ -299,13 +286,13 @@ class _HomeScreenState extends State<HomeScreen> {
     int targetSeconds;
 
     switch (_currentDifficulty) {
-      case '초급':
+      case 'easy':
         targetSeconds = 180;
         break;
-      case '중급':
+      case 'miduam':
         targetSeconds = 360;
         break;
-      case '고급':
+      case 'hard':
         targetSeconds = 600;
         break;
       default:
@@ -563,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFBBADA0),
                         borderRadius: BorderRadius.circular(12),
@@ -571,7 +558,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // 1. 난이도 선택 버튼 (이모지 포함)
+                          // 1. 난이도 선택 버튼 (이모지 없음, easy / miduam / hard)
                           PopupMenuButton<String>(
                             initialValue: _currentDifficulty,
                             onSelected: (String level) {
@@ -588,12 +575,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             itemBuilder: (context) => [
-                              _buildMenuItem('초급', Icons.sentiment_satisfied_alt, const Color(0xFF8F7A66)),
-                              _buildMenuItem('중급', Icons.sentiment_neutral, const Color(0xFF8F7A66)),
-                              _buildMenuItem('고급', Icons.local_fire_department, const Color(0xFF8F7A66)),
+                              _buildMenuItem('easy', Icons.sentiment_satisfied_alt, const Color(0xFF8F7A66)),
+                              _buildMenuItem('miduam', Icons.sentiment_neutral, const Color(0xFF8F7A66)),
+                              _buildMenuItem('hard', Icons.local_fire_department, const Color(0xFF8F7A66)),
                             ],
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
@@ -601,11 +588,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    _difficultyEmoji,
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(width: 4),
                                   Text(
                                     _currentDifficulty,
                                     style: const TextStyle(
@@ -628,7 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF776E65),
                                 borderRadius: BorderRadius.circular(8),
@@ -638,7 +620,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const Icon(Icons.stars_rounded, size: 16, color: Color(0xFFEDC22E)),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '점수: ${_getCurrentGameScore()}점',
+                                    'score: ${_getCurrentGameScore()}점',
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   const SizedBox(width: 2),
@@ -647,9 +629,27 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // 3. 경과시간 카드
+                          // 3. 최고점수 버튼 (점수 버튼 우측)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF776E65),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.emoji_events_rounded, size: 16, color: Color(0xFFEDC22E)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'best: $_bestScore점',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // 4. 경과 시간 카드 (time: mm:ss)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                             decoration: BoxDecoration(
                               color: const Color(0xFF776E65),
                               borderRadius: BorderRadius.circular(8),
@@ -659,7 +659,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const Icon(Icons.timer_outlined, size: 16, color: Color(0xFFF2B179)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '경과시간: ${_formatDuration(_elapsedSeconds)}',
+                                  'time: ${_formatDuration(_elapsedSeconds)}',
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ],
@@ -696,23 +696,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
+                              children: const [
                                 Text(
-                                  '🏆 최고점수: $_bestScore점',
-                                  style: const TextStyle(
+                                  '🏆 점수 산출 기준',
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFFEDC22E),
                                   ),
                                 ),
-                                const Icon(Icons.close, size: 16, color: Color(0xFFEEE4DA)),
+                                Icon(Icons.close, size: 16, color: Color(0xFFEEE4DA)),
                               ],
                             ),
                             const Divider(height: 12, thickness: 1, color: Color(0xFF8F7A66)),
                             const Text(
-                              '• 초급: 100점 / 3분 (180초)\n'
-                              '• 중급: 300점 / 6분 (360초)\n'
-                              '• 고급: 600점 / 10분 (600초)\n\n'
+                              '• easy: 100점 / 3분 (180초)\n'
+                              '• miduam: 300점 / 6분 (360초)\n'
+                              '• hard: 600점 / 10분 (600초)\n\n'
                               '⭐ 점수 계산 방식\n'
                               '• 기준 시간 이내 성공: 기본 점수 + (기준 시간 - 해결 시간)\n'
                               '• 기준 시간 초과 성공: 기본 점수 - (해결 시간 - 기준 시간)\n'
