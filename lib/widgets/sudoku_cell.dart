@@ -97,7 +97,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -113,7 +113,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -129,7 +129,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -145,7 +145,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -174,7 +174,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -190,7 +190,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -206,7 +206,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
@@ -222,7 +222,7 @@ class SudokuCellWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade800,
+                    color: const Color(0xFF776E65),
                   ),
                 ),
               ),
